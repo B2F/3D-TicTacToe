@@ -63,9 +63,9 @@ const Game: React.FC = () => {
     // Check diagonals in each layer (main diagonal)
     for (let layer = 0; layer < size; layer++) {
       for (let start = 0; start < size - 3; start++) {
-        if (board[layer][start][start] !== '' && 
-            board[layer][start][start] === board[layer][start + 1][start + 1] && 
-            board[layer][start + 1][start + 1] === board[layer][start + 2][start + 2] && 
+        if (board[layer][start][start] !== '' &&
+            board[layer][start][start] === board[layer][start + 1][start + 1] &&
+            board[layer][start + 1][start + 1] === board[layer][start + 2][start + 2] &&
             board[layer][start + 2][start + 2] === board[layer][start + 3][start + 3]) {
           return board[layer][start][start];
         }
@@ -75,11 +75,95 @@ const Game: React.FC = () => {
     // Check diagonals in each layer (anti-diagonal)
     for (let layer = 0; layer < size; layer++) {
       for (let start = 0; start < size - 3; start++) {
-        if (board[layer][start][size - 1 - start] !== '' && 
-            board[layer][start][size - 1 - start] === board[layer][start + 1][size - 2 - start] && 
-            board[layer][start + 1][size - 2 - start] === board[layer][start + 2][size - 3 - start] && 
+        if (board[layer][start][size - 1 - start] !== '' &&
+            board[layer][start][size - 1 - start] === board[layer][start + 1][size - 2 - start] &&
+            board[layer][start + 1][size - 2 - start] === board[layer][start + 2][size - 3 - start] &&
             board[layer][start + 2][size - 3 - start] === board[layer][start + 3][size - 4 - start]) {
           return board[layer][start][size - 1 - start];
+        }
+      }
+    }
+
+    // Check diagonals in XZ planes (constant y, vertical slices)
+    // These are the diagonals in planes where y-coordinate is constant
+    for (let y = 0; y < size; y++) {
+      for (let start = 0; start < size - 3; start++) {
+        // Main diagonal: (start,y,start) -> (start+1,y,start+1) -> (start+2,y,start+2) -> (start+3,y,start+3)
+        if (board[start][y][start] !== '' &&
+            board[start][y][start] === board[start + 1][y][start + 1] &&
+            board[start + 1][y][start + 1] === board[start + 2][y][start + 2] &&
+            board[start + 2][y][start + 2] === board[start + 3][y][start + 3]) {
+          return board[start][y][start];
+        }
+        // Anti-diagonal: (start,y,size-start-1) -> (start+1,y,size-start-2) -> (start+2,y,size-start-3) -> (start+3,y,size-start-4)
+        if (board[start][y][size - start - 1] !== '' &&
+            board[start][y][size - start - 1] === board[start + 1][y][size - start - 2] &&
+            board[start + 1][y][size - start - 2] === board[start + 2][y][size - start - 3] &&
+            board[start + 2][y][size - start - 3] === board[start + 3][y][size - start - 4]) {
+          return board[start][y][size - start - 1];
+        }
+      }
+    }
+
+    // Check diagonals in YZ planes (constant x, vertical slices)
+    // These are the diagonals in planes where x-coordinate is constant
+    for (let x = 0; x < size; x++) {
+      for (let start = 0; start < size - 3; start++) {
+        // Main diagonal: (x,start,start) -> (x,start+1,start+1) -> (x,start+2,start+2) -> (x,start+3,start+3)
+        if (board[x][start][start] !== '' &&
+            board[x][start][start] === board[x][start + 1][start + 1] &&
+            board[x][start + 1][start + 1] === board[x][start + 2][start + 2] &&
+            board[x][start + 2][start + 2] === board[x][start + 3][start + 3]) {
+          return board[x][start][start];
+        }
+        // Anti-diagonal: (x,start,size-start-1) -> (x,start+1,size-start-2) -> (x,start+2,size-start-3) -> (x,start+3,size-start-4)
+        if (board[x][start][size - start - 1] !== '' &&
+            board[x][start][size - start - 1] === board[x][start + 1][size - start - 2] &&
+            board[x][start + 1][size - start - 2] === board[x][start + 2][size - start - 3] &&
+            board[x][start + 2][size - start - 3] === board[x][start + 3][size - start - 4]) {
+          return board[x][start][size - start - 1];
+        }
+      }
+    }
+
+    // Check diagonals in XZ planes (constant y, horizontal slices)
+    // These are the diagonals in planes where y-coordinate is constant
+    for (let y = 0; y < size; y++) {
+      for (let start = 0; start < size - 3; start++) {
+        // Main diagonal: (start,y,start) -> (start+1,y,start+1) -> (start+2,y,start+2) -> (start+3,y,start+3)
+        if (board[start][y][start] !== '' &&
+            board[start][y][start] === board[start + 1][y][start + 1] &&
+            board[start + 1][y][start + 1] === board[start + 2][y][start + 2] &&
+            board[start + 2][y][start + 2] === board[start + 3][y][start + 3]) {
+          return board[start][y][start];
+        }
+        // Anti-diagonal: (start,y,size-start-1) -> (start+1,y,size-start-2) -> (start+2,y,size-start-3) -> (start+3,y,size-start-4)
+        if (board[start][y][size - start - 1] !== '' &&
+            board[start][y][size - start - 1] === board[start + 1][y][size - start - 2] &&
+            board[start + 1][y][size - start - 2] === board[start + 2][y][size - start - 3] &&
+            board[start + 2][y][size - start - 3] === board[start + 3][y][size - start - 4]) {
+          return board[start][y][size - start - 1];
+        }
+      }
+    }
+
+    // Check diagonals in YZ planes (constant x, vertical slices)
+    // These are the diagonals in planes where x-coordinate is constant
+    for (let x = 0; x < size; x++) {
+      for (let start = 0; start < size - 3; start++) {
+        // Main diagonal: (x,start,start) -> (x,start+1,start+1) -> (x,start+2,start+2) -> (x,start+3,start+3)
+        if (board[x][start][start] !== '' &&
+            board[x][start][start] === board[x][start + 1][start + 1] &&
+            board[x][start + 1][start + 1] === board[x][start + 2][start + 2] &&
+            board[x][start + 2][start + 2] === board[x][start + 3][start + 3]) {
+          return board[x][start][start];
+        }
+        // Anti-diagonal: (x,start,size-start-1) -> (x,start+1,size-start-2) -> (x,start+2,size-start-3) -> (x,start+3,size-start-4)
+        if (board[x][start][size - start - 1] !== '' &&
+            board[x][start][size - start - 1] === board[x][start + 1][size - start - 2] &&
+            board[x][start + 1][size - start - 2] === board[x][start + 2][size - start - 3] &&
+            board[x][start + 2][size - start - 3] === board[x][start + 3][size - start - 4]) {
+          return board[x][start][size - start - 1];
         }
       }
     }
@@ -121,6 +205,237 @@ const Game: React.FC = () => {
             return board[layer][size - 1 - row][size - 1 - col];
           }
         }
+      }
+    }
+
+    // Check additional 3D diagonal patterns (stair-like patterns)
+    // These are other diagonal patterns that go through the cube in different directions
+    
+    // Diagonals with different step patterns
+    for (let layer = 0; layer < size - 3; layer++) {
+      for (let row = 0; row < size - 3; row++) {
+        for (let col = 0; col < size - 3; col++) {
+          // Diagonal with pattern: (+1, +1, -1) direction (if we consider wrapping or different patterns)
+          // Actually, let me think about other 3D diagonal directions that might exist
+          
+          // Pattern: (+1, -1, +1) - layer+1, row-1, col+1 (but row-1 needs to start higher)
+          if (layer < size - 3 && row >= 3 && col < size - 3 &&
+              board[layer][row][col] !== '' && 
+              board[layer][row][col] === board[layer + 1][row - 1][col + 1] && 
+              board[layer + 1][row - 1][col + 1] === board[layer + 2][row - 2][col + 2] && 
+              board[layer + 2][row - 2][col + 2] === board[layer + 3][row - 3][col + 3]) {
+            return board[layer][row][col];
+          }
+          
+          // Pattern: (-1, +1, +1) - but layer-1 needs to start higher
+          if (layer >= 3 && row < size - 3 && col < size - 3 &&
+              board[layer][row][col] !== '' && 
+              board[layer][row][col] === board[layer - 1][row + 1][col + 1] && 
+              board[layer - 1][row + 1][col + 1] === board[layer - 2][row + 2][col + 2] && 
+              board[layer - 2][row + 2][col + 2] === board[layer - 3][row + 3][col + 3]) {
+            return board[layer][row][col];
+          }
+          
+          // Pattern: (+1, -1, -1)
+          if (layer < size - 3 && row >= 3 && col >= 3 &&
+              board[layer][row][col] !== '' && 
+              board[layer][row][col] === board[layer + 1][row - 1][col - 1] && 
+              board[layer + 1][row - 1][col - 1] === board[layer + 2][row - 2][col - 2] && 
+              board[layer + 2][row - 2][col - 2] === board[layer + 3][row - 3][col - 3]) {
+            return board[layer][row][col];
+          }
+        }
+      }
+    }
+
+    // Additional 3D diagonals starting from different positions
+    // Check for diagonals going in reverse directions more systematically
+    for (let layer = 3; layer < size; layer++) {
+      for (let row = 0; row < size - 3; row++) {
+        for (let col = 0; col < size - 3; col++) {
+          // Pattern: (-1, +1, +1) starting from higher layer
+          if (board[layer][row][col] !== '' && 
+              board[layer][row][col] === board[layer - 1][row + 1][col + 1] && 
+              board[layer - 1][row + 1][col + 1] === board[layer - 2][row + 2][col + 2] && 
+              board[layer - 2][row + 2][col + 2] === board[layer - 3][row + 3][col + 3]) {
+            return board[layer][row][col];
+          }
+        }
+      }
+    }
+
+    // More comprehensive 3D diagonal patterns (inner stair-like patterns)
+    // Cover all possible 3D diagonal directions
+    for (let layer = 0; layer < size; layer++) {
+      for (let row = 0; row < size; row++) {
+        for (let col = 0; col < size; col++) {
+          // Check all possible 3D diagonal directions from each position
+          
+          // Direction: (+1, +1, -1) - but need to ensure bounds
+          if (layer < size - 3 && row < size - 3 && col >= 3 &&
+              board[layer][row][col] !== '' && 
+              board[layer][row][col] === board[layer + 1][row + 1][col - 1] && 
+              board[layer + 1][row + 1][col - 1] === board[layer + 2][row + 2][col - 2] && 
+              board[layer + 2][row + 2][col - 2] === board[layer + 3][row + 3][col - 3]) {
+            return board[layer][row][col];
+          }
+          
+          // Direction: (+1, -1, +1) - already covered but let me ensure all bounds
+          if (layer < size - 3 && row >= 3 && col < size - 3 &&
+              board[layer][row][col] !== '' && 
+              board[layer][row][col] === board[layer + 1][row - 1][col + 1] && 
+              board[layer + 1][row - 1][col + 1] === board[layer + 2][row - 2][col + 2] && 
+              board[layer + 2][row - 2][col + 2] === board[layer + 3][row - 3][col + 3]) {
+            return board[layer][row][col];
+          }
+          
+          // Direction: (-1, +1, -1) 
+          if (layer >= 3 && row < size - 3 && col >= 3 &&
+              board[layer][row][col] !== '' && 
+              board[layer][row][col] === board[layer - 1][row + 1][col - 1] && 
+              board[layer - 1][row + 1][col - 1] === board[layer - 2][row + 2][col - 2] && 
+              board[layer - 2][row + 2][col - 2] === board[layer - 3][row + 3][col - 3]) {
+            return board[layer][row][col];
+          }
+          
+          // Direction: (-1, -1, +1)
+          if (layer >= 3 && row >= 3 && col < size - 3 &&
+              board[layer][row][col] !== '' && 
+              board[layer][row][col] === board[layer - 1][row - 1][col + 1] && 
+              board[layer - 1][row - 1][col + 1] === board[layer - 2][row - 2][col + 2] && 
+              board[layer - 2][row - 2][col + 2] === board[layer - 3][row - 3][col + 3]) {
+            return board[layer][row][col];
+          }
+          
+          // Direction: (+1, -1, -1) - already covered
+          if (layer < size - 3 && row >= 3 && col >= 3 &&
+              board[layer][row][col] !== '' && 
+              board[layer][row][col] === board[layer + 1][row - 1][col - 1] && 
+              board[layer + 1][row - 1][col - 1] === board[layer + 2][row - 2][col - 2] && 
+              board[layer + 2][row - 2][col - 2] === board[layer + 3][row - 3][col - 3]) {
+            return board[layer][row][col];
+          }
+          
+          // Direction: (-1, -1, -1)
+          if (layer >= 3 && row >= 3 && col >= 3 &&
+              board[layer][row][col] !== '' && 
+              board[layer][row][col] === board[layer - 1][row - 1][col - 1] && 
+              board[layer - 1][row - 1][col - 1] === board[layer - 2][row - 2][col - 2] && 
+              board[layer - 2][row - 2][col - 2] === board[layer - 3][row - 3][col - 3]) {
+            return board[layer][row][col];
+          }
+        }
+      }
+    }
+
+    // Check diagonals on the outer faces of the cube
+    // These are the "surface diagonals" that go across the faces of the 4x4x4 cube
+    
+    // Front face (z = 0): diagonals across x and y axes
+    for (let start = 0; start < size - 3; start++) {
+      // Main diagonal (0,0,0) -> (1,1,0) -> (2,2,0) -> (3,3,0)
+      if (board[start][start][0] !== '' && 
+          board[start][start][0] === board[start + 1][start + 1][0] && 
+          board[start + 1][start + 1][0] === board[start + 2][start + 2][0] && 
+          board[start + 2][start + 2][0] === board[start + 3][start + 3][0]) {
+        return board[start][start][0];
+      }
+      // Anti-diagonal (3,0,0) -> (2,1,0) -> (1,2,0) -> (0,3,0)
+      if (board[size - 1 - start][start][0] !== '' && 
+          board[size - 1 - start][start][0] === board[size - 2 - start][start + 1][0] && 
+          board[size - 2 - start][start + 1][0] === board[size - 3 - start][start + 2][0] && 
+          board[size - 3 - start][start + 2][0] === board[size - 4 - start][start + 3][0]) {
+        return board[size - 1 - start][start][0];
+      }
+    }
+
+    // Back face (z = 3): diagonals across x and y axes
+    for (let start = 0; start < size - 3; start++) {
+      // Main diagonal (0,0,3) -> (1,1,3) -> (2,2,3) -> (3,3,3)
+      if (board[start][start][size - 1] !== '' && 
+          board[start][start][size - 1] === board[start + 1][start + 1][size - 1] && 
+          board[start + 1][start + 1][size - 1] === board[start + 2][start + 2][size - 1] && 
+          board[start + 2][start + 2][size - 1] === board[start + 3][start + 3][size - 1]) {
+        return board[start][start][size - 1];
+      }
+      // Anti-diagonal (3,0,3) -> (2,1,3) -> (1,2,3) -> (0,3,3)
+      if (board[size - 1 - start][start][size - 1] !== '' && 
+          board[size - 1 - start][start][size - 1] === board[size - 2 - start][start + 1][size - 1] && 
+          board[size - 2 - start][start + 1][size - 1] === board[size - 3 - start][start + 2][size - 1] && 
+          board[size - 3 - start][start + 2][size - 1] === board[size - 4 - start][start + 3][size - 1]) {
+        return board[size - 1 - start][start][size - 1];
+      }
+    }
+
+    // Left face (x = 0): diagonals across y and z axes
+    for (let start = 0; start < size - 3; start++) {
+      // Main diagonal (0,0,0) -> (0,1,1) -> (0,2,2) -> (0,3,3)
+      if (board[0][start][start] !== '' && 
+          board[0][start][start] === board[0][start + 1][start + 1] && 
+          board[0][start + 1][start + 1] === board[0][start + 2][start + 2] && 
+          board[0][start + 2][start + 2] === board[0][start + 3][start + 3]) {
+        return board[0][start][start];
+      }
+      // Anti-diagonal (0,0,3) -> (0,1,2) -> (0,2,1) -> (0,3,0)
+      if (board[0][start][size - 1 - start] !== '' && 
+          board[0][start][size - 1 - start] === board[0][start + 1][size - 2 - start] && 
+          board[0][start + 1][size - 2 - start] === board[0][start + 2][size - 3 - start] && 
+          board[0][start + 2][size - 3 - start] === board[0][start + 3][size - 4 - start]) {
+        return board[0][start][size - 1 - start];
+      }
+    }
+
+    // Right face (x = 3): diagonals across y and z axes
+    for (let start = 0; start < size - 3; start++) {
+      // Main diagonal (3,0,0) -> (3,1,1) -> (3,2,2) -> (3,3,3)
+      if (board[size - 1][start][start] !== '' && 
+          board[size - 1][start][start] === board[size - 1][start + 1][start + 1] && 
+          board[size - 1][start + 1][start + 1] === board[size - 1][start + 2][start + 2] && 
+          board[size - 1][start + 2][start + 2] === board[size - 1][start + 3][start + 3]) {
+        return board[size - 1][start][start];
+      }
+      // Anti-diagonal (3,0,3) -> (3,1,2) -> (3,2,1) -> (3,3,0)
+      if (board[size - 1][start][size - 1 - start] !== '' && 
+          board[size - 1][start][size - 1 - start] === board[size - 1][start + 1][size - 2 - start] && 
+          board[size - 1][start + 1][size - 2 - start] === board[size - 1][start + 2][size - 3 - start] && 
+          board[size - 1][start + 2][size - 3 - start] === board[size - 1][start + 3][size - 4 - start]) {
+        return board[size - 1][start][size - 1 - start];
+      }
+    }
+
+    // Bottom face (y = 0): diagonals across x and z axes
+    for (let start = 0; start < size - 3; start++) {
+      // Main diagonal (0,0,0) -> (1,0,1) -> (2,0,2) -> (3,0,3)
+      if (board[start][0][start] !== '' && 
+          board[start][0][start] === board[start + 1][0][start + 1] && 
+          board[start + 1][0][start + 1] === board[start + 2][0][start + 2] && 
+          board[start + 2][0][start + 2] === board[start + 3][0][start + 3]) {
+        return board[start][0][start];
+      }
+      // Anti-diagonal (3,0,0) -> (2,0,1) -> (1,0,2) -> (0,0,3)
+      if (board[size - 1 - start][0][start] !== '' && 
+          board[size - 1 - start][0][start] === board[size - 2 - start][0][start + 1] && 
+          board[size - 2 - start][0][start + 1] === board[size - 3 - start][0][start + 2] && 
+          board[size - 3 - start][0][start + 2] === board[size - 4 - start][0][start + 3]) {
+        return board[size - 1 - start][0][start];
+      }
+    }
+
+    // Top face (y = 3): diagonals across x and z axes
+    for (let start = 0; start < size - 3; start++) {
+      // Main diagonal (0,3,0) -> (1,3,1) -> (2,3,2) -> (3,3,3)
+      if (board[start][size - 1][start] !== '' && 
+          board[start][size - 1][start] === board[start + 1][size - 1][start + 1] && 
+          board[start + 1][size - 1][start + 1] === board[start + 2][size - 1][start + 2] && 
+          board[start + 2][size - 1][start + 2] === board[start + 3][size - 1][start + 3]) {
+        return board[start][size - 1][start];
+      }
+      // Anti-diagonal (3,3,0) -> (2,3,1) -> (1,3,2) -> (0,3,3)
+      if (board[size - 1 - start][size - 1][start] !== '' && 
+          board[size - 1 - start][size - 1][start] === board[size - 2 - start][size - 1][start + 1] && 
+          board[size - 2 - start][size - 1][start + 1] === board[size - 3 - start][size - 1][start + 2] && 
+          board[size - 3 - start][size - 1][start + 2] === board[size - 4 - start][size - 1][start + 3]) {
+        return board[size - 1 - start][size - 1][start];
       }
     }
 
