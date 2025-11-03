@@ -11,6 +11,7 @@ interface BoardProps {
 const Board: React.FC<BoardProps> = ({ board, onClick }) => {
   // Add spacing between layers to make cubes easier to select
   const layerSpacing = 2; // Increased spacing between layers
+  const cubeSpacing = layerSpacing; // Set cube spacing equal to layer spacing
 
   return (
     <>
@@ -25,9 +26,9 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
             <Cell
               key={`${layerIndex}-${rowIndex}-${colIndex}`}
               position={[
-                colIndex - 1.5, // Center the grid horizontally (x-axis) - adjusted for 4x4
+                (colIndex - 1.5) * cubeSpacing, // Center the grid horizontally (x-axis) - adjusted for 4x4 with cube spacing
                 layerIndex * layerSpacing - 1.5 * layerSpacing, // Add spacing between layers (y-axis) - adjusted for 4 layers
-                rowIndex - 1.5 // Center the grid vertically (z-axis) - adjusted for 4x4
+                (rowIndex - 1.5) * cubeSpacing // Center the grid vertically (z-axis) - adjusted for 4x4 with cube spacing
               ]}
               value={cell}
               onClick={() => onClick(layerIndex, rowIndex, colIndex)}
