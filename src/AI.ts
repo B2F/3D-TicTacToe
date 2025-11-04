@@ -118,10 +118,10 @@ export const checkWin = (board: BoardState, player: Player): boolean => {
   }
 
   // Reverse space diagonals (4 directions) - starting from the opposite corner
+  // Main reverse space diagonal: (3,3,3) -> (2,2,2) -> (1,1,1) -> (0,0,0)
   for (let startLayer = 3; startLayer < size; startLayer++) {
     for (let startRow = 3; startRow < size; startRow++) {
       for (let startCol = 3; startCol < size; startCol++) {
-        // (layer, row, col) -> (layer-1, row-1, col-1) -> (layer-2, row-2, col-2) -> (layer-3, row-3, col-3)
         if (board[startLayer][startRow][startCol] !== '' &&
             board[startLayer][startRow][startCol] === player &&
             board[startLayer][startRow][startCol] === board[startLayer - 1][startRow - 1][startCol - 1] &&
@@ -129,8 +129,14 @@ export const checkWin = (board: BoardState, player: Player): boolean => {
             board[startLayer - 2][startRow - 2][startCol - 2] === board[startLayer - 3][startRow - 3][startCol - 3]) {
           return true;
         }
+      }
+    }
+  }
 
-        // (layer, row, size-1-col) -> (layer-1, row-1, size-2-col) -> (layer-2, row-2, size-3-col) -> (layer-3, row-3, size-4-col)
+  // Anti-diagonal reverse space diagonal: (3,3,0) -> (2,2,1) -> (1,1,2) -> (0,0,3)
+  for (let startLayer = 3; startLayer < size; startLayer++) {
+    for (let startRow = 3; startRow < size; startRow++) {
+      for (let startCol = 0; startCol < size - 3; startCol++) {
         if (board[startLayer][startRow][size - 1 - startCol] !== '' &&
             board[startLayer][startRow][size - 1 - startCol] === player &&
             board[startLayer][startRow][size - 1 - startCol] === board[startLayer - 1][startRow - 1][size - 2 - startCol] &&
@@ -138,8 +144,14 @@ export const checkWin = (board: BoardState, player: Player): boolean => {
             board[startLayer - 2][startRow - 2][size - 3 - startCol] === board[startLayer - 3][startRow - 3][size - 4 - startCol]) {
           return true;
         }
+      }
+    }
+  }
 
-        // (layer, size-1-row, col) -> (layer-1, size-2-row, col-1) -> (layer-2, size-3-row, col-2) -> (layer-3, size-4-row, col-3)
+  // Third reverse space diagonal: (3,0,3) -> (2,1,2) -> (1,2,1) -> (0,3,0)
+  for (let startLayer = 3; startLayer < size; startLayer++) {
+    for (let startRow = 0; startRow < size - 3; startRow++) {
+      for (let startCol = 3; startCol < size; startCol++) {
         if (board[startLayer][size - 1 - startRow][startCol] !== '' &&
             board[startLayer][size - 1 - startRow][startCol] === player &&
             board[startLayer][size - 1 - startRow][startCol] === board[startLayer - 1][size - 2 - startRow][startCol - 1] &&
@@ -147,8 +159,14 @@ export const checkWin = (board: BoardState, player: Player): boolean => {
             board[startLayer - 2][size - 3 - startRow][startCol - 2] === board[startLayer - 3][size - 4 - startRow][startCol - 3]) {
           return true;
         }
+      }
+    }
+  }
 
-        // (layer, size-1-row, size-1-col) -> (layer-1, size-2-row, size-2-col) -> (layer-2, size-3-row, size-3-col) -> (layer-3, size-4-row, size-4-col)
+  // Fourth reverse space diagonal: (3,0,0) -> (2,1,1) -> (1,2,2) -> (0,3,3)
+  for (let startLayer = 3; startLayer < size; startLayer++) {
+    for (let startRow = 0; startRow < size - 3; startRow++) {
+      for (let startCol = 0; startCol < size - 3; startCol++) {
         if (board[startLayer][size - 1 - startRow][size - 1 - startCol] !== '' &&
             board[startLayer][size - 1 - startRow][size - 1 - startCol] === player &&
             board[startLayer][size - 1 - startRow][size - 1 - startCol] === board[startLayer - 1][size - 2 - startRow][size - 2 - startCol] &&
@@ -396,13 +414,13 @@ export const minimax = (
   let maxDepth = 0;
   switch (difficulty) {
     case 'easy':
-      maxDepth = 2;
+      maxDepth = 1;
       break;
     case 'medium':
-      maxDepth = 4;
+      maxDepth = 2;
       break;
     case 'hard':
-      maxDepth = 6;
+      maxDepth = 3; // Reduced from 6 to avoid long computation times
       break;
   }
 
