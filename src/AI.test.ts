@@ -134,28 +134,28 @@ describe('AI Functions', () => {
   });
 
   test('should handle minimax with alpha-beta pruning', () => {
-    const emptyBoard: BoardState = Array(4).fill(null).map(() => 
+    const emptyBoard: BoardState = Array(4).fill(null).map(() =>
       Array(4).fill(null).map(() => Array(4).fill(''))
     );
-    
-    const result = minimax(emptyBoard, 0, -Infinity, Infinity, true, 'X', 'easy');
+
+    const result = minimax(emptyBoard, 0, -Infinity, Infinity, true, 'X', 1);
     expect(result).toHaveProperty('score');
     expect(result).toHaveProperty('move');
     expect(result.move).toBeNull(); // At depth 0 with empty board, no specific move needed
   });
 
   test('should handle minimax with winning position', () => {
-    const winningBoard: BoardState = Array(4).fill(null).map(() => 
+    const winningBoard: BoardState = Array(4).fill(null).map(() =>
       Array(4).fill(null).map(() => Array(4).fill(''))
     );
-    
+
     // Set up a winning position for X
     winningBoard[0][0][0] = 'X';
     winningBoard[0][0][1] = 'X';
     winningBoard[0][0][2] = 'X';
     // Leave [0][0][3] empty for X to win
-    
-    const result = minimax(winningBoard, 0, -Infinity, Infinity, true, 'X', 'medium');
+
+    const result = minimax(winningBoard, 0, -Infinity, Infinity, true, 'X', 3);
     expect(result.score).toBeGreaterThan(900); // Should be close to 1000 for winning position
  });
 });

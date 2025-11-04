@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Board from './Board';
 import AIPlayer from './AIPlayer';
 import { Difficulty, BoardState } from './types';
-import { checkWin } from './AI';
+import { checkWin, WinningCells } from './AI';
 
 const Game: React.FC = () => {
   const [board, setBoard] = useState<BoardState>(Array(4).fill(null).map(() => Array(4).fill(null).map(() => Array(4).fill(''))));
   const [currentPlayer, setCurrentPlayer] = useState<'X' | 'O'>('X');
   const [winner, setWinner] = useState<string | null>(null);
+  const [winningCells, setWinningCells] = useState<WinningCells>([]);
   const [gameOver, setGameOver] = useState(false);
 
   // Computer player state
@@ -17,32 +18,34 @@ const Game: React.FC = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [isComputerThinking, setIsComputerThinking] = useState(false);
 
-  const calculateWinner = (board: BoardState): string | null => {
-    if (checkWin(board, 'X')) return 'X';
-    if (checkWin(board, 'O')) return 'O';
-    return null;
-  };
+  const calculateWinner = useCallback((board: BoardState): { winner: string | null; winningCells: WinningCells } => {
+    const xWin = checkWin(board, 'X');
+    if (xWin) return { winner: 'X', winningCells: xWin };
+    const oWin = checkWin(board, 'O');
+    if (oWin) return { winner: 'O', winningCells: oWin };
+    return { winner: null, winningCells: [] };
+  }, []);
 
-  const handleAIMove = (x: number, y: number, z: number) => {
-    if (gameOver || board[x][y][z] !== '') return;
+  const handleAIMove = useCallback((x: number, y: number, z: number) => {
+    if (gameOver || x < 0 || x >= 4 || y < 0 || y >= 4 || z < 0 || z >= 4 || board[x][y][z] !== '') return;
 
-    const newBoard = [...board];
-    newBoard[x][y] = [...newBoard[x][y]];
+    const newBoard = board.map(layer => layer.map(row => [...row]));
     newBoard[x][y][z] = currentPlayer;
     setBoard(newBoard);
 
-    const winner = calculateWinner(newBoard);
+    const { winner, winningCells: winCells } = calculateWinner(newBoard);
     if (winner) {
       setWinner(winner);
+      setWinningCells(winCells);
       setGameOver(true);
     } else if (newBoard.flat(2).every(cell => cell !== '')) {
       setGameOver(true);
     } else {
       setCurrentPlayer(currentPlayer === 'X' ? 'O' : 'X');
     }
-  };
+  }, [board, currentPlayer, gameOver, calculateWinner]);
 
-  const handleClick = (layer: number, row: number, col: number) => {
+  const handleClick = useCallback((layer: number, row: number, col: number) => {
     if (gameOver || board[layer][row][col] !== '' || isComputerThinking) return;
 
     // Only allow human player to make moves in computer mode
@@ -50,28 +53,29 @@ const Game: React.FC = () => {
       return; // Computer's turn, human can't make a move
     }
 
-    const newBoard = [...board];
-    newBoard[layer][row] = [...newBoard[layer][row]];
+    const newBoard = board.map(layer => layer.map(row => [...row]));
     newBoard[layer][row][col] = currentPlayer;
     setBoard(newBoard);
 
-    const winner = calculateWinner(newBoard);
+    const { winner, winningCells: winCells } = calculateWinner(newBoard);
     if (winner) {
       setWinner(winner);
+      setWinningCells(winCells);
       setGameOver(true);
     } else if (newBoard.flat(2).every(cell => cell !== '')) {
       setGameOver(true);
     } else {
       setCurrentPlayer(currentPlayer === 'X' ? 'O' : 'X');
     }
-  };
+  }, [board, currentPlayer, gameOver, isComputerThinking, gameMode, computerPlayer, calculateWinner]);
 
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     setBoard(Array(4).fill(null).map(() => Array(4).fill(null).map(() => Array(4).fill(''))));
     setCurrentPlayer('X');
     setWinner(null);
+    setWinningCells([]);
     setGameOver(false);
-  };
+  }, []);
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
@@ -130,7 +134,7 @@ const Game: React.FC = () => {
 
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
         <Canvas camera={{ position: [6, 6, 6], fov: 50 }}>
-          <Board board={board} onClick={handleClick} currentPlayer={currentPlayer} />
+          <Board board={board} onClick={handleClick} currentPlayer={currentPlayer} winningCells={winningCells} />
         </Canvas>
       </div>
 

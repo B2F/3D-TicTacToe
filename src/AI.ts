@@ -1,333 +1,47 @@
-// Win detection function (same as in Game.tsx but exported for AI use)
+// Optimized win detection function using direction vectors
 import { BoardState, Player, Difficulty } from './types';
-export const checkWin = (board: BoardState, player: Player): boolean => {
+
+export type WinningCells = [number, number, number][];
+
+export const checkWin = (board: BoardState, player: Player): WinningCells | null => {
   const size = 4;
+  const directions = [
+    [1,0,0], [0,1,0], [0,0,1],  // orthogonal
+    [1,1,0], [1,-1,0], [0,1,1], [0,1,-1], [1,0,1], [1,0,-1],  // 2D diagonals
+    [1,1,1], [1,1,-1], [1,-1,1], [-1,1,1]  // 3D diagonals
+  ];
 
-  // Check for winning combinations in 3D
-  for (let layer = 0; layer < size; layer++) {
-    // Check rows in the current layer
-    for (let row = 0; row < size; row++) {
-      for (let col = 0; col < size - 3; col++) {
-        if (board[layer][row][col] !== '' &&
-            board[layer][row][col] === player &&
-            board[layer][row][col] === board[layer][row][col + 1] &&
-            board[layer][row][col + 1] === board[layer][row][col + 2] &&
-            board[layer][row][col + 2] === board[layer][row][col + 3]) {
-          return true;
-        }
-      }
-    }
-
-    // Check columns in the current layer
-    for (let col = 0; col < size; col++) {
-      for (let row = 0; row < size - 3; row++) {
-        if (board[layer][row][col] !== '' &&
-            board[layer][row][col] === player &&
-            board[layer][row][col] === board[layer][row + 1][col] &&
-            board[layer][row + 1][col] === board[layer][row + 2][col] &&
-            board[layer][row + 2][col] === board[layer][row + 3][col]) {
-          return true;
-        }
-      }
-    }
-  }
-
-  // Check pillars (vertical across layers)
-  for (let row = 0; row < size; row++) {
-    for (let col = 0; col < size; col++) {
-      for (let layer = 0; layer < size - 3; layer++) {
-        if (board[layer][row][col] !== '' &&
-            board[layer][row][col] === player &&
-            board[layer][row][col] === board[layer + 1][row][col] &&
-            board[layer + 1][row][col] === board[layer + 2][row][col] &&
-            board[layer + 2][row][col] === board[layer + 3][row][col]) {
-          return true;
-        }
-      }
-    }
-  }
-
-  // Check diagonals in each layer (main diagonal)
-  for (let layer = 0; layer < size; layer++) {
-    for (let start = 0; start < size - 3; start++) {
-      if (board[layer][start][start] !== '' &&
-          board[layer][start][start] === player &&
-          board[layer][start][start] === board[layer][start + 1][start + 1] &&
-          board[layer][start + 1][start + 1] === board[layer][start + 2][start + 2] &&
-          board[layer][start + 2][start + 2] === board[layer][start + 3][start + 3]) {
-        return true;
-      }
-    }
-  }
-
-  // Check diagonals in each layer (anti-diagonal)
-  for (let layer = 0; layer < size; layer++) {
-    for (let start = 0; start < size - 3; start++) {
-      if (board[layer][start][size - 1 - start] !== '' &&
-          board[layer][start][size - 1 - start] === player &&
-          board[layer][start][size - 1 - start] === board[layer][start + 1][size - 2 - start] &&
-          board[layer][start + 1][size - 2 - start] === board[layer][start + 2][size - 3 - start] &&
-          board[layer][start + 2][size - 3 - start] === board[layer][start + 3][size - 4 - start]) {
-        return true;
-      }
-    }
-  }
-
-  // Check 3D space diagonals - all 8 possible space diagonals through the cube
-  // Main space diagonals (4 directions)
-  for (let startLayer = 0; startLayer < size - 3; startLayer++) {
-    for (let startRow = 0; startRow < size - 3; startRow++) {
-      for (let startCol = 0; startCol < size - 3; startCol++) {
-        // (layer, row, col) -> (layer+1, row+1, col+1) -> (layer+2, row+2, col+2) -> (layer+3, row+3, col+3)
-        if (board[startLayer][startRow][startCol] !== '' &&
-            board[startLayer][startRow][startCol] === player &&
-            board[startLayer][startRow][startCol] === board[startLayer + 1][startRow + 1][startCol + 1] &&
-            board[startLayer + 1][startRow + 1][startCol + 1] === board[startLayer + 2][startRow + 2][startCol + 2] &&
-            board[startLayer + 2][startRow + 2][startCol + 2] === board[startLayer + 3][startRow + 3][startCol + 3]) {
-          return true;
-        }
-
-        // (layer, row, size-1-col) -> (layer+1, row+1, size-2-col) -> (layer+2, row+2, size-3-col) -> (layer+3, row+3, size-4-col)
-        if (board[startLayer][startRow][size - 1 - startCol] !== '' &&
-            board[startLayer][startRow][size - 1 - startCol] === player &&
-            board[startLayer][startRow][size - 1 - startCol] === board[startLayer + 1][startRow + 1][size - 2 - startCol] &&
-            board[startLayer + 1][startRow + 1][size - 2 - startCol] === board[startLayer + 2][startRow + 2][size - 3 - startCol] &&
-            board[startLayer + 2][startRow + 2][size - 3 - startCol] === board[startLayer + 3][startRow + 3][size - 4 - startCol]) {
-          return true;
-        }
-
-        // (layer, size-1-row, col) -> (layer+1, size-2-row, col+1) -> (layer+2, size-3-row, col+2) -> (layer+3, size-4-row, col+3)
-        if (board[startLayer][size - 1 - startRow][startCol] !== '' &&
-            board[startLayer][size - 1 - startRow][startCol] === player &&
-            board[startLayer][size - 1 - startRow][startCol] === board[startLayer + 1][size - 2 - startRow][startCol + 1] &&
-            board[startLayer + 1][size - 2 - startRow][startCol + 1] === board[startLayer + 2][size - 3 - startRow][startCol + 2] &&
-            board[startLayer + 2][size - 3 - startRow][startCol + 2] === board[startLayer + 3][size - 4 - startRow][startCol + 3]) {
-          return true;
-        }
-
-        // (layer, size-1-row, size-1-col) -> (layer+1, size-2-row, size-2-col) -> (layer+2, size-3-row, size-3-col) -> (layer+3, size-4-row, size-4-col)
-        if (board[startLayer][size - 1 - startRow][size - 1 - startCol] !== '' &&
-            board[startLayer][size - 1 - startRow][size - 1 - startCol] === player &&
-            board[startLayer][size - 1 - startRow][size - 1 - startCol] === board[startLayer + 1][size - 2 - startRow][size - 2 - startCol] &&
-            board[startLayer + 1][size - 2 - startRow][size - 2 - startCol] === board[startLayer + 2][size - 3 - startRow][size - 3 - startCol] &&
-            board[startLayer + 2][size - 3 - startRow][size - 3 - startCol] === board[startLayer + 3][size - 4 - startRow][size - 4 - startCol]) {
-          return true;
-        }
-      }
-    }
-  }
-
-  // Reverse space diagonals (4 directions) - starting from the opposite corner
-  // Main reverse space diagonal: (3,3,3) -> (2,2,2) -> (1,1,1) -> (0,0,0)
-  for (let startLayer = 3; startLayer < size; startLayer++) {
-    for (let startRow = 3; startRow < size; startRow++) {
-      for (let startCol = 3; startCol < size; startCol++) {
-        if (board[startLayer][startRow][startCol] !== '' &&
-            board[startLayer][startRow][startCol] === player &&
-            board[startLayer][startRow][startCol] === board[startLayer - 1][startRow - 1][startCol - 1] &&
-            board[startLayer - 1][startRow - 1][startCol - 1] === board[startLayer - 2][startRow - 2][startCol - 2] &&
-            board[startLayer - 2][startRow - 2][startCol - 2] === board[startLayer - 3][startRow - 3][startCol - 3]) {
-          return true;
-        }
-      }
-    }
-  }
-
-  // Anti-diagonal reverse space diagonal: (3,3,0) -> (2,2,1) -> (1,1,2) -> (0,0,3)
-  for (let startLayer = 3; startLayer < size; startLayer++) {
-    for (let startRow = 3; startRow < size; startRow++) {
-      for (let startCol = 0; startCol < size - 3; startCol++) {
-        if (board[startLayer][startRow][size - 1 - startCol] !== '' &&
-            board[startLayer][startRow][size - 1 - startCol] === player &&
-            board[startLayer][startRow][size - 1 - startCol] === board[startLayer - 1][startRow - 1][size - 2 - startCol] &&
-            board[startLayer - 1][startRow - 1][size - 2 - startCol] === board[startLayer - 2][startRow - 2][size - 3 - startCol] &&
-            board[startLayer - 2][startRow - 2][size - 3 - startCol] === board[startLayer - 3][startRow - 3][size - 4 - startCol]) {
-          return true;
-        }
-      }
-    }
-  }
-
-  // Third reverse space diagonal: (3,0,3) -> (2,1,2) -> (1,2,1) -> (0,3,0)
-  for (let startLayer = 3; startLayer < size; startLayer++) {
-    for (let startRow = 0; startRow < size - 3; startRow++) {
-      for (let startCol = 3; startCol < size; startCol++) {
-        if (board[startLayer][size - 1 - startRow][startCol] !== '' &&
-            board[startLayer][size - 1 - startRow][startCol] === player &&
-            board[startLayer][size - 1 - startRow][startCol] === board[startLayer - 1][size - 2 - startRow][startCol - 1] &&
-            board[startLayer - 1][size - 2 - startRow][startCol - 1] === board[startLayer - 2][size - 3 - startRow][startCol - 2] &&
-            board[startLayer - 2][size - 3 - startRow][startCol - 2] === board[startLayer - 3][size - 4 - startRow][startCol - 3]) {
-          return true;
-        }
-      }
-    }
-  }
-
-  // Fourth reverse space diagonal: (3,0,0) -> (2,1,1) -> (1,2,2) -> (0,3,3)
-  for (let startLayer = 3; startLayer < size; startLayer++) {
-    for (let startRow = 0; startRow < size - 3; startRow++) {
-      for (let startCol = 0; startCol < size - 3; startCol++) {
-        if (board[startLayer][size - 1 - startRow][size - 1 - startCol] !== '' &&
-            board[startLayer][size - 1 - startRow][size - 1 - startCol] === player &&
-            board[startLayer][size - 1 - startRow][size - 1 - startCol] === board[startLayer - 1][size - 2 - startRow][size - 2 - startCol] &&
-            board[startLayer - 1][size - 2 - startRow][size - 2 - startCol] === board[startLayer - 2][size - 3 - startRow][size - 3 - startCol] &&
-            board[startLayer - 2][size - 3 - startRow][size - 3 - startCol] === board[startLayer - 3][size - 4 - startRow][size - 4 - startCol]) {
-          return true;
-        }
-      }
-    }
-  }
-
-  // Check 2D diagonals in XZ planes (constant Y, vertical slices through layers and columns)
-  // These are diagonals in planes where the Y-coordinate is constant
-  for (let y = 0; y < size; y++) {
-    for (let start = 0; start < size - 3; start++) {
-      // Main diagonal in XZ plane: (start,y,start) -> (start+1,y,start+1) -> (start+2,y,start+2) -> (start+3,y,start+3)
-      if (board[start][y][start] !== '' &&
-          board[start][y][start] === player &&
-          board[start][y][start] === board[start + 1][y][start + 1] &&
-          board[start + 1][y][start + 1] === board[start + 2][y][start + 2] &&
-          board[start + 2][y][start + 2] === board[start + 3][y][start + 3]) {
-        return true;
-      }
-      // Anti-diagonal in XZ plane: (start,y,size-start-1) -> (start+1,y,size-start-2) -> (start+2,y,size-start-3) -> (start+3,y,size-start-4)
-      if (board[start][y][size - start - 1] !== '' &&
-          board[start][y][size - start - 1] === player &&
-          board[start][y][size - start - 1] === board[start + 1][y][size - start - 2] &&
-          board[start + 1][y][size - start - 2] === board[start + 2][y][size - start - 3] &&
-          board[start + 2][y][size - start - 3] === board[start + 3][y][size - start - 4]) {
-        return true;
-      }
-    }
-  }
-
-  // Check 2D diagonals in YZ planes (constant X, vertical slices through rows and columns)
-  // These are diagonals in planes where the X-coordinate is constant
   for (let x = 0; x < size; x++) {
-    for (let start = 0; start < size - 3; start++) {
-      // Main diagonal in YZ plane: (x,start,start) -> (x,start+1,start+1) -> (x,start+2,start+2) -> (x,start+3,start+3)
-      if (board[x][start][start] !== '' &&
-          board[x][start][start] === player &&
-          board[x][start][start] === board[x][start + 1][start + 1] &&
-          board[x][start + 1][start + 1] === board[x][start + 2][start + 2] &&
-          board[x][start + 2][start + 2] === board[x][start + 3][start + 3]) {
-        return true;
-      }
-      // Anti-diagonal in YZ plane: (x,start,size-start-1) -> (x,start+1,size-start-2) -> (x,start+2,size-start-3) -> (x,start+3,size-start-4)
-      if (board[x][start][size - start - 1] !== '' &&
-          board[x][start][size - start - 1] === player &&
-          board[x][start][size - start - 1] === board[x][start + 1][size - start - 2] &&
-          board[x][start + 1][size - start - 2] === board[x][start + 2][size - start - 3] &&
-          board[x][start + 2][size - start - 3] === board[x][start + 3][size - start - 4]) {
-        return true;
-      }
-    }
-  }
+    for (let y = 0; y < size; y++) {
+      for (let z = 0; z < size; z++) {
+        if (board[x][y][z] === player) {
+          for (const [dx, dy, dz] of directions) {
+            const winningCells: WinningCells = [];
+            let count = 0;
 
-  // Check 2D diagonals in XY planes (constant Z, horizontal slices through layers and rows)
-  // These are diagonals in planes where the Z-coordinate is constant
-  for (let z = 0; z < size; z++) {
-    for (let start = 0; start < size - 3; start++) {
-      // Main diagonal in XY plane: (start,start,z) -> (start+1,start+1,z) -> (start+2,start+2,z) -> (start+3,start+3,z)
-      if (board[start][start][z] !== '' &&
-          board[start][start][z] === player &&
-          board[start][start][z] === board[start + 1][start + 1][z] &&
-          board[start + 1][start + 1][z] === board[start + 2][start + 2][z] &&
-          board[start + 2][start + 2][z] === board[start + 3][start + 3][z]) {
-        return true;
-      }
-      // Anti-diagonal in XY plane: (start,size-start-1,z) -> (start+1,size-start-2,z) -> (start+2,size-start-3,z) -> (start+3,size-start-4,z)
-      if (board[start][size - start - 1][z] !== '' &&
-          board[start][size - start - 1][z] === player &&
-          board[start][size - start - 1][z] === board[start + 1][size - start - 2][z] &&
-          board[start + 1][size - start - 2][z] === board[start + 2][size - start - 3][z] &&
-          board[start + 2][size - start - 3][z] === board[start + 3][size - start - 4][z]) {
-        return true;
-      }
-    }
-  }
+            for (let i = 0; i < 4; i++) {
+              const nx = x + dx * i, ny = y + dy * i, nz = z + dz * i;
+              if (nx >= 0 && nx < size && ny >= 0 && ny < size && nz >= 0 && nz < size &&
+                  board[nx][ny][nz] === player) {
+                winningCells.push([nx, ny, nz]);
+                count++;
+              } else break;
+            }
 
-  // Check additional 3D diagonal patterns that weren't covered above
-  // These are diagonals that go in different directions in 3D space
-
-  // Diagonals with mixed directions: (+1, +1, -1), (+1, -1, +1), (-1, +1, +1), etc.
-  for (let layer = 0; layer < size; layer++) {
-    for (let row = 0; row < size; row++) {
-      for (let col = 0; col < size; col++) {
-        // Direction: (+1, +1, -1) - layer increases, row increases, col decreases
-        if (layer < size - 3 && row < size - 3 && col >= 3 &&
-            board[layer][row][col] !== '' &&
-            board[layer][row][col] === player &&
-            board[layer][row][col] === board[layer + 1][row + 1][col - 1] &&
-            board[layer + 1][row + 1][col - 1] === board[layer + 2][row + 2][col - 2] &&
-            board[layer + 2][row + 2][col - 2] === board[layer + 3][row + 3][col - 3]) {
-          return true;
-        }
-
-        // Direction: (+1, -1, +1) - layer increases, row decreases, col increases
-        if (layer < size - 3 && row >= 3 && col < size - 3 &&
-            board[layer][row][col] !== '' &&
-            board[layer][row][col] === player &&
-            board[layer][row][col] === board[layer + 1][row - 1][col + 1] &&
-            board[layer + 1][row - 1][col + 1] === board[layer + 2][row - 2][col + 2] &&
-            board[layer + 2][row - 2][col + 2] === board[layer + 3][row - 3][col + 3]) {
-          return true;
-        }
-
-        // Direction: (-1, +1, +1) - layer decreases, row increases, col increases
-        if (layer >= 3 && row < size - 3 && col < size - 3 &&
-            board[layer][row][col] !== '' &&
-            board[layer][row][col] === player &&
-            board[layer][row][col] === board[layer - 1][row + 1][col + 1] &&
-            board[layer - 1][row + 1][col + 1] === board[layer - 2][row + 2][col + 2] &&
-            board[layer - 2][row + 2][col + 2] === board[layer - 3][row + 3][col + 3]) {
-          return true;
-        }
-
-        // Direction: (+1, -1, -1) - layer increases, row decreases, col decreases
-        if (layer < size - 3 && row >= 3 && col >= 3 &&
-            board[layer][row][col] !== '' &&
-            board[layer][row][col] === player &&
-            board[layer][row][col] === board[layer + 1][row - 1][col - 1] &&
-            board[layer + 1][row - 1][col - 1] === board[layer + 2][row - 2][col - 2] &&
-            board[layer + 2][row - 2][col - 2] === board[layer + 3][row - 3][col - 3]) {
-          return true;
-        }
-
-        // Direction: (-1, +1, -1) - layer decreases, row increases, col decreases
-        if (layer >= 3 && row < size - 3 && col >= 3 &&
-            board[layer][row][col] !== '' &&
-            board[layer][row][col] === player &&
-            board[layer][row][col] === board[layer - 1][row + 1][col - 1] &&
-            board[layer - 1][row + 1][col - 1] === board[layer - 2][row + 2][col - 2] &&
-            board[layer - 2][row + 2][col - 2] === board[layer - 3][row + 3][col - 3]) {
-          return true;
-        }
-
-        // Direction: (-1, -1, +1) - layer decreases, row decreases, col increases
-        if (layer >= 3 && row >= 3 && col < size - 3 &&
-            board[layer][row][col] !== '' &&
-            board[layer][row][col] === player &&
-            board[layer][row][col] === board[layer - 1][row - 1][col + 1] &&
-            board[layer - 1][row - 1][col + 1] === board[layer - 2][row - 2][col + 2] &&
-            board[layer - 2][row - 2][col + 2] === board[layer - 3][row - 3][col + 3]) {
-          return true;
-        }
-
-        // Direction: (-1, -1, -1) - all coordinates decrease
-        if (layer >= 3 && row >= 3 && col >= 3 &&
-            board[layer][row][col] !== '' &&
-            board[layer][row][col] === player &&
-            board[layer][row][col] === board[layer - 1][row - 1][col - 1] &&
-            board[layer - 1][row - 1][col - 1] === board[layer - 2][row - 2][col - 2] &&
-            board[layer - 2][row - 2][col - 2] === board[layer - 3][row - 3][col - 3]) {
-          return true;
+            if (count >= 4) {
+              return winningCells;
+            }
+          }
         }
       }
     }
   }
+  return null;
+};
 
-  return false;
+// Legacy boolean version for backward compatibility
+export const hasWinner = (board: BoardState, player: Player): boolean => {
+  return checkWin(board, player) !== null;
 };
 
 // Helper function to check if board is full
@@ -366,7 +80,47 @@ export const makeMove = (board: BoardState, x: number, y: number, z: number, pla
   return newBoard;
 };
 
-// Evaluation function for the board position
+// Helper function to generate all possible 4-cell lines
+const generateAllPossibleLines = (board: BoardState): string[][] => {
+  const lines: string[][] = [];
+  const size = 4;
+
+  // All possible directions for 4-cell lines
+  const directions = [
+    [1,0,0], [0,1,0], [0,0,1],  // orthogonal
+    [1,1,0], [1,-1,0], [0,1,1], [0,1,-1], [1,0,1], [1,0,-1],  // 2D diagonals
+    [1,1,1], [1,1,-1], [1,-1,1], [-1,1,1]  // 3D diagonals
+  ];
+
+  for (let x = 0; x < size; x++) {
+    for (let y = 0; y < size; y++) {
+      for (let z = 0; z < size; z++) {
+        for (const [dx, dy, dz] of directions) {
+          const line: string[] = [];
+          let valid = true;
+
+          for (let i = 0; i < 4; i++) {
+            const nx = x + dx * i, ny = y + dy * i, nz = z + dz * i;
+            if (nx >= 0 && nx < size && ny >= 0 && ny < size && nz >= 0 && nz < size) {
+              line.push(board[nx][ny][nz]);
+            } else {
+              valid = false;
+              break;
+            }
+          }
+
+          if (valid) {
+            lines.push(line);
+          }
+        }
+      }
+    }
+  }
+
+  return lines;
+};
+
+// Improved evaluation function for the board position
 export const evaluateBoard = (board: BoardState, maximizingPlayer: Player): number => {
   const opponent: Player = maximizingPlayer === 'X' ? 'O' : 'X';
 
@@ -377,20 +131,25 @@ export const evaluateBoard = (board: BoardState, maximizingPlayer: Player): numb
   // If board is full and no winner, it's a draw
   if (isBoardFull(board)) return 0;
 
-  // Evaluate based on potential winning lines and control
+  // Evaluate based on potential winning lines
   let score = 0;
+  const lines = generateAllPossibleLines(board);
 
-  // Evaluate potential winning opportunities
-  // This is a simplified evaluation - could be enhanced for better AI
-  for (let x = 0; x < 4; x++) {
-    for (let y = 0; y < 4; y++) {
-      for (let z = 0; z < 4; z++) {
-        if (board[x][y][z] === maximizingPlayer) {
-          score += 1; // Basic score for player pieces
-        } else if (board[x][y][z] === opponent) {
-          score -= 1; // Penalty for opponent pieces
-        }
-      }
+  for (const line of lines) {
+    const playerCount = line.filter(cell => cell === maximizingPlayer).length;
+    const opponentCount = line.filter(cell => cell === opponent).length;
+    const emptyCount = line.filter(cell => cell === '').length;
+
+    if (playerCount === 4) return 1000;
+    if (opponentCount === 4) return -1000;
+
+    if (playerCount > 0 && opponentCount === 0) {
+      // Player has potential in this line
+      score += Math.pow(10, playerCount);
+    }
+    if (opponentCount > 0 && playerCount === 0) {
+      // Opponent has potential in this line
+      score -= Math.pow(10, opponentCount);
     }
   }
 
@@ -405,24 +164,10 @@ export const minimax = (
   beta: number,
   isMaximizing: boolean,
   maximizingPlayer: Player,
-  difficulty: Difficulty
+  maxDepth: number
 ): { score: number; move: [number, number, number] | null } => {
   const opponent: Player = maximizingPlayer === 'X' ? 'O' : 'X';
   const currentPlayer: Player = isMaximizing ? maximizingPlayer : opponent;
-
-  // Determine max depth based on difficulty
-  let maxDepth = 0;
-  switch (difficulty) {
-    case 'easy':
-      maxDepth = 1;
-      break;
-    case 'medium':
-      maxDepth = 2;
-      break;
-    case 'hard':
-      maxDepth = 3; // Reduced from 6 to avoid long computation times
-      break;
-  }
 
   // Check terminal conditions
   if (checkWin(board, maximizingPlayer)) {
@@ -434,7 +179,6 @@ export const minimax = (
   if (isBoardFull(board) || depth >= maxDepth) {
     return { score: evaluateBoard(board, maximizingPlayer), move: null };
   }
-
   const possibleMoves = getPossibleMoves(board);
 
   if (isMaximizing) {
@@ -443,7 +187,7 @@ export const minimax = (
 
     for (const [x, y, z] of possibleMoves) {
       const newBoard = makeMove(board, x, y, z, currentPlayer);
-      const result = minimax(newBoard, depth + 1, alpha, beta, false, maximizingPlayer, difficulty);
+      const result = minimax(newBoard, depth + 1, alpha, beta, false, maximizingPlayer, maxDepth);
       const score = result.score;
 
       if (score > bestScore) {
@@ -462,7 +206,7 @@ export const minimax = (
 
     for (const [x, y, z] of possibleMoves) {
       const newBoard = makeMove(board, x, y, z, currentPlayer);
-      const result = minimax(newBoard, depth + 1, alpha, beta, true, maximizingPlayer, difficulty);
+      const result = minimax(newBoard, depth + 1, alpha, beta, true, maximizingPlayer, maxDepth);
       const score = result.score;
 
       if (score < bestScore) {
@@ -478,9 +222,18 @@ export const minimax = (
   }
 };
 
-// Function to get the best move for the computer player
+// Function to get the best move for the computer player with fixed depth limits
 export const getBestMove = (board: BoardState, player: Player, difficulty: Difficulty): [number, number, number] => {
-  const result = minimax(board, 0, -Infinity, Infinity, true, player, difficulty);
+  // Set depth limits based on difficulty (not time-based to ensure consistent difficulty)
+  const depthLimits = {
+    easy: 1,      // Very shallow search - basic blocking
+    medium: 3,    // Moderate depth - strategic play
+    hard: 5       // Deep search - expert level
+  };
+
+  const maxDepth = depthLimits[difficulty];
+  const result = minimax(board, 0, -Infinity, Infinity, true, player, maxDepth);
+
   if (result.move) {
     return result.move;
   } else {

@@ -6,19 +6,25 @@ interface BoardProps {
   board: string[][][];
   onClick: (layer: number, row: number, col: number) => void;
   currentPlayer: 'X' | 'O';
+  winningCells?: [number, number, number][];
 }
 
-const Board: React.FC<BoardProps> = ({ board, onClick }) => {
+const Board: React.FC<BoardProps> = ({ board, onClick, winningCells = [] }) => {
   // Add spacing between layers to make cubes easier to select
   const layerSpacing = 2; // Increased spacing between layers
   const cubeSpacing = layerSpacing; // Set cube spacing equal to layer spacing
+
+  // Helper function to check if a cell is part of the winning combination
+  const isWinningCell = (layerIndex: number, rowIndex: number, colIndex: number): boolean => {
+    return winningCells.some(([x, y, z]) => x === layerIndex && y === rowIndex && z === colIndex);
+  };
 
   return (
     <>
       {/* Add lighting */}
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} />
-      
+
       {/* Render the 4x4x4 grid of cells */}
       {board.map((layer, layerIndex) =>
         layer.map((row, rowIndex) =>
@@ -32,11 +38,12 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
               ]}
               value={cell}
               onClick={() => onClick(layerIndex, rowIndex, colIndex)}
+              isWinning={isWinningCell(layerIndex, rowIndex, colIndex)}
             />
           ))
         )
       )}
-      
+
       {/* Add orbit controls for camera movement */}
       <OrbitControls />
     </>
