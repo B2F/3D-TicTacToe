@@ -4,18 +4,18 @@ import { BoardState } from './types';
 describe('AI Functions', () => {
   test('should detect win conditions correctly', () => {
     // Test row win in first layer
-    const winningBoard: BoardState = Array(4).fill(null).map(() => 
+    const winningBoard: BoardState = Array(4).fill(null).map(() =>
       Array(4).fill(null).map(() => Array(4).fill(''))
     );
-    
+
     // Fill first row with X
     winningBoard[0][0][0] = 'X';
     winningBoard[0][0][1] = 'X';
     winningBoard[0][0][2] = 'X';
     winningBoard[0][0][3] = 'X';
-    
-    expect(checkWin(winningBoard, 'X')).toBe(true);
-    expect(checkWin(winningBoard, 'O')).toBe(false);
+
+    expect(checkWin(winningBoard, 'X')).not.toBeNull();
+    expect(checkWin(winningBoard, 'O')).toBeNull();
   });
 
   test('should detect when board is full', () => {
@@ -49,8 +49,8 @@ describe('AI Functions', () => {
     expect(possibleMoves).not.toContain([1, 1, 1]);
     
     // Check that empty positions are in possible moves
-    expect(possibleMoves).toContain([0, 0, 1]);
-    expect(possibleMoves).toContain([2, 2, 2]);
+    expect(possibleMoves).toContainEqual([0, 0, 1]);
+    expect(possibleMoves).toContainEqual([2, 2, 2]);
   });
 
   test('should evaluate board positions', () => {
@@ -141,7 +141,9 @@ describe('AI Functions', () => {
     const result = minimax(emptyBoard, 0, -Infinity, Infinity, true, 'X', 1);
     expect(result).toHaveProperty('score');
     expect(result).toHaveProperty('move');
-    expect(result.move).toBeNull(); // At depth 0 with empty board, no specific move needed
+    expect(result.move).not.toBeNull(); // At depth 0, should return the best move
+    expect(Array.isArray(result.move)).toBe(true);
+    expect(result.move!.length).toBe(3);
   });
 
   test('should handle minimax with winning position', () => {
