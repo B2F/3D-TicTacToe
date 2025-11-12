@@ -2,7 +2,7 @@
 
 An advanced 3D Tic Tac Toe game built with React, TypeScript, and Three.js. Play against a friend or challenge our intelligent AI with three difficulty levels!
 
-![3D Tic Tac Toe Game Preview](public/logo192.png)
+![3D Tic Tac Toe Game Preview](screenshot.png)
 
 ## Features
 
