@@ -38,6 +38,32 @@ files: src/types.ts, all .tsx and .ts files
 Potential optimization of minimax algorithm for deeper searches and faster move calculation
 files: src/AI.ts
 
+## RECENT UPDATES
+
+### Project Setup Fixes [✔]
+
+**NTFS Symlink Issue Resolution**
+Fixed "sh: 1: vite: not found" error caused by NTFS file system restrictions preventing npm symlink creation
+- Solution: Used `npm install --no-bin-links` to bypass symlink requirements
+- Updated package.json scripts to use direct vite.js paths: `node_modules/vite/bin/vite.js`
+- All npm scripts now work correctly: dev, build, preview
+files: package.json
+
+**README.md Documentation Update**
+Updated project documentation to reflect Vite-based architecture
+- Changed development server command from `npm start` to `npm run dev`
+- Updated development URL from localhost:3000 to localhost:5173
+- Corrected build output location from `build/` to `dist/`
+- Added `npm run preview` command documentation
+- Removed Create React App references, updated to Vite-specific information
+files: README.md
+
+**Development Environment Verification**
+- ✅ npm install works correctly with --no-bin-links flag
+- ✅ npm run dev starts Vite development server successfully
+- ✅ Development server accessible at http://localhost:5173/
+- ✅ All build and preview commands functional
+
 ## TECHNICAL ARCHITECTURE
 
 ### Core Architecture Decisions
